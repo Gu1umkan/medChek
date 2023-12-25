@@ -36,9 +36,6 @@ public class PatientDaoImpl implements GenericDao<Patient> {
     @Override
     public List<Hospital> getAllHospital() {
         return database.getHospitals();
-//        List<Patient> patients = new ArrayList<>();
-//       database.getHospitals().forEach(hospital -> patients.addAll(hospital.getPatients()));
-//        return patients;
     }
 }
 
