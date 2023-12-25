@@ -113,7 +113,7 @@ public class Main {
               case 16->{
                   System.out.print("Enter Department ID: ");
                   Long id =chekLong();
-                  List<Long> ids = new ArrayList<>(Arrays.asList(1L,2L,3L));
+                  List<Long> ids = new ArrayList<>(Arrays.asList(1L,4L,3L));
                   System.out.println(doctorService.assignDoctorToDepartment(id, ids));
               }
               case 17->{
@@ -205,7 +205,7 @@ public class Main {
             try {
                 return new Scanner(System.in).nextLong();
             } catch (InputMismatchException e) {
-                System.out.println("long тибинде id киргиз: ");
+                System.out.print("long тибинде id киргиз: ");
             }
         }
     }
