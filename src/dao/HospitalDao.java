@@ -8,5 +8,4 @@ public interface HospitalDao {
     String add(Hospital hospital);
     boolean remove(Hospital hospital);
     List<Hospital> getAllHospital();
-    // Hospital getHospitalById(Long id);
 }
