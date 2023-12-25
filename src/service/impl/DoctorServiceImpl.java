@@ -11,7 +11,7 @@ import service.GenericService;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DoctorServiceImpl implements GenericService<Doctor>, DoctorService {
+public class DoctorServiceImpl implements DoctorService {
     private final DoctorDaoImpl doctorDao;
 
     public DoctorServiceImpl(DoctorDaoImpl doctorDao) {
@@ -21,9 +21,11 @@ public class DoctorServiceImpl implements GenericService<Doctor>, DoctorService 
     @Override
     public Doctor findDoctorById(Long id) {
         try {
-            for (Doctor doctor : doctorDao.getAll()) {
-                if (doctor.getId().equals(id)) {
-                    return doctor;
+            for (Hospital hospital : doctorDao.getAllHospital()) {
+                for (Doctor doctor : hospital.getDoctors()) {
+                    if (doctor.getId().equals(id)) {
+                        return doctor;
+                    }
                 }
             }
             throw new NotFoundException("doctor not found");
@@ -44,34 +46,44 @@ public class DoctorServiceImpl implements GenericService<Doctor>, DoctorService 
                     for (Long l : doctorsId) {
                         if (doctorIDOfHospital.contains(l)) {
                             count++;
-                            System.out.println("This ID: "+l+"   found ");
-                        }
-                        else System.out.println("This ID: "+l+"  not found ");
+                            System.out.println("This ID: " + l + "   found ");
+                        } else System.out.println("This ID: " + l + "  not found ");
                     }
                     if (count == doctorsId.size()) {
+                        List<Doctor> doctorsToRemove = new ArrayList<>();
                         for (Doctor doctor : hospital.getDoctors()) {
-                            if (doctorsId.contains(doctor.getId()))
+                            if (doctorsId.contains(doctor.getId())) {
                                 department.getDoctors().add(doctor);
-                            hospital.getDoctors().remove(doctor);
+                                doctorsToRemove.add(doctor);
+                            }
                         }
+                        hospital.getDoctors().removeAll(doctorsToRemove);
                         return "Successfully assign";
-                    } return "Don't successfully assign";
-
+                    } else return "Don't successfully assign";
                 }
-
             }
-        } return "Not found Department ID!!!";
+        }
+        return "Not found Department ID!!!";
     }
 
 
     @Override
     public List<Doctor> getAllDoctorsByHospitalId(Long id) {
+        List<Doctor> doctors = new ArrayList<>();
         try {
-            return doctorDao.getallByHospitalId(id);
+            for (Hospital hospital : doctorDao.getAllHospital()) {
+                if (hospital.getId().equals(id)) {
+                    hospital.getDepartments().forEach(department -> doctors.addAll(department.getDoctors()));
+                    if (!doctors.containsAll(hospital.getDoctors())) {
+                        doctors.addAll(hospital.getDoctors());
+                    } return doctors;
+                }
+            }
+            throw new NotFoundException("Not found id!!!");
         } catch (NotFoundException e) {
             System.out.println(e.getMessage());
         }
-        return null;
+        return doctors;
     }
 
     @Override
@@ -84,8 +96,9 @@ public class DoctorServiceImpl implements GenericService<Doctor>, DoctorService 
                     }
                 }
             }
+            throw new NotFoundException("Not found department id!!!");
         } catch (NotFoundException e) {
-            System.out.println("Not found  department id");
+            System.out.println(e.getMessage());
         }
         return null;
     }
@@ -94,8 +107,7 @@ public class DoctorServiceImpl implements GenericService<Doctor>, DoctorService 
     public String add(Long hospitalId, Doctor doctor) {
         for (Hospital hospital : doctorDao.getAllHospital()) {
             if (hospital.getId().equals(hospitalId)) {
-                hospital.getDoctors().add(doctor);
-                return "Successfully added";
+                return doctorDao.add(hospital, doctor);
             }
         }
         return "Not found hospital id";
@@ -103,21 +115,28 @@ public class DoctorServiceImpl implements GenericService<Doctor>, DoctorService 
 
     @Override
     public void removeById(Long id) {
-        try {
-            doctorDao.removeById(id);
-            System.out.println("Successfully deleted");
-        } catch (NotFoundException e) {
-            System.out.println(e.getMessage());
+        boolean remove = false;
+        boolean remove1 = false;
+        for (Hospital hospital : doctorDao.getAllHospital()) {
+            if (hospital.getDoctors().removeIf(doctor -> doctor.getId().equals(id)))
+                remove = true;
+            for (Department department : hospital.getDepartments()) {
+                if (department.getDoctors().removeIf(doctor -> doctor.getId().equals(id)))
+                    remove1 = true;
+            }
         }
+        if (remove1 || remove) System.out.println("Successfully deleted✅");
+        else System.out.println("Not found Doctor ID❗️");
     }
 
     @Override
     public String updateById(Long id, Doctor doctor) {
-
-        for (Doctor doctor1 : doctorDao.getAll()) {
-            if (doctor1.getId().equals(id)) {
-                doctor1.setFirstName(doctor.getFirstName());
-                return "Successfully updated";
+        for (Hospital hospital : doctorDao.getAllHospital()) {
+            for (Doctor doctor1 : hospital.getDoctors()) {
+                if (doctor1.getId().equals(id)) {
+                    doctor1.setFirstName(doctor.getFirstName());
+                    return "Successfully updated";
+                }
             }
         }
         return "Not found id";

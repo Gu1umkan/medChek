@@ -20,8 +20,7 @@ public class HospitalServiceImpl implements HospitalService {
     @Override
     public String addHospital(Hospital hospital) {
         if (hospital != null) {
-            hospitalDao.add(hospital);
-            return "Successfully added";
+          return  hospitalDao.add(hospital);
         }
         return "Hospital is null";
     }
@@ -29,7 +28,10 @@ public class HospitalServiceImpl implements HospitalService {
     @Override
     public Hospital findHospitalById(Long id) {
         try {
-            return hospitalDao.getHospitalById(id);
+            for (Hospital hospital : hospitalDao.getAllHospital()) {
+                if (hospital.getId().equals(id)) return hospital;
+            }
+            throw new NotFoundException("Not found hospital id");
         } catch (NotFoundException e) {
             System.out.println(e.getMessage());
         }
@@ -38,14 +40,17 @@ public class HospitalServiceImpl implements HospitalService {
 
     @Override
     public List<Hospital> getAllHospital() {
-        return hospitalDao.getAll();
+        return hospitalDao.getAllHospital();
 
     }
 
     @Override
     public List<Patient> getAllPatientFromHospital(Long id) {
         try {
-            return hospitalDao.getHospitalById(id).getPatients();
+            for (Hospital hospital : hospitalDao.getAllHospital()) {
+                if (hospital.getId().equals(id)) return hospital.getPatients();
+            }
+            throw new NotFoundException("Not found Hospital id");
         } catch (NotFoundException e) {
             System.out.println(e.getMessage());
         }
@@ -55,8 +60,9 @@ public class HospitalServiceImpl implements HospitalService {
     @Override
     public String deleteHospitalById(Long id) {
         try {
-            hospitalDao.removeById(id);
-            return "Successfully deleted";
+            if (hospitalDao.getAllHospital().removeIf(hospital -> hospital.getId().equals(id)))
+                return "Successfully deleted";
+            else throw new NotFoundException("Not found hospital ID❗️");
         } catch (Exception e) {
             return e.getMessage();
         }
@@ -66,13 +72,14 @@ public class HospitalServiceImpl implements HospitalService {
     public Map<String, Hospital> getAllHospitalByAddress(String address) {
         Map<String, Hospital> hospitalMap = new HashMap<>();
         try {
-            for (Hospital hospital : hospitalDao.getAll()) {
+            for (Hospital hospital : hospitalDao.getAllHospital()) {
                 if (hospital.getAddress().equalsIgnoreCase(address)) {
                     hospitalMap.put(hospital.getAddress(), hospital);
                     return hospitalMap;
                 }
-            }throw new NotFoundException("Not found address");
-        } catch (NotFoundException e){
+            }
+            throw new NotFoundException("Not found address");
+        } catch (NotFoundException e) {
             System.out.println(e.getMessage());
         }
         return null;

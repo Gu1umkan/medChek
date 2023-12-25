@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface HospitalDao {
     String add(Hospital hospital);
-    boolean removeById(Long id);
-    List<Hospital> getAll();
-    Hospital getHospitalById(Long id);
+    boolean remove(Hospital hospital);
+    List<Hospital> getAllHospital();
+    // Hospital getHospitalById(Long id);
 }

@@ -2,6 +2,7 @@ package dao.impl;
 
 import dao.GenericDao;
 import db.Database;
+import idGenerator.IDGenerator;
 import model.Doctor;
 import model.Hospital;
 import myException.NotFoundException;
@@ -19,40 +20,16 @@ public class DoctorDaoImpl implements GenericDao<Doctor> {
 
 
     @Override
-    public String add(Long id,Doctor doctor) {
-        for (Hospital hospital : database.getHospitals()) {
-            if(hospital.getId().equals(id)){
-                hospital.getDoctors().add(doctor);
-                return doctor+ "\n Succcessfully added";
-            }
-        }
-
-       throw new NotFoundException("Not found id!");
+    public String add(Hospital hospital,Doctor doctor) {
+        doctor.setId(IDGenerator.idDoctor());
+       hospital.getDoctors().add(doctor);
+           return doctor+ " \nSuccessfully added";
     }
 
     @Override
-    public boolean removeById(Long id) {
-        for (Hospital hospital : database.getHospitals()) {
-            return hospital.getDoctors().removeIf(doctor -> doctor.getId().equals(id));
-        }
-        throw  new NotFoundException("Not found id!!!");
-
-    }
-
-    @Override
-    public List<Doctor> getallByHospitalId(Long id) {
-        for (Hospital hospital : database.getHospitals()) {
-           if (hospital.getId().equals(id)) return hospital.getDoctors();
-        } throw  new NotFoundException("Not found id!!!");
-    }
-
-    @Override
-    public List<Doctor> getAll() {
-        List<Doctor> doctors = new ArrayList<>();
-        database.getHospitals().forEach(hospital -> doctors.addAll(hospital.getDoctors()));
-        return doctors;
-    }
-
+    public boolean remove(Hospital hospital,Doctor doctor) {
+       return hospital.getDoctors().remove(doctor);
+       }
     public List<Hospital> getAllHospital(){
         return database.getHospitals();
     }

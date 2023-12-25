@@ -2,6 +2,7 @@ package dao.impl;
 
 import dao.HospitalDao;
 import db.Database;
+import idGenerator.IDGenerator;
 import model.Hospital;
 import myException.NotFoundException;
 
@@ -17,28 +18,22 @@ public class HospitalDaoImpl implements HospitalDao {
 
     @Override
     public String add(Hospital hospital) {
+        hospital.setId(IDGenerator.idHospital());
         database.getHospitals().add(hospital);
         return hospital + "\nSuccrssfully added";
     }
 
     @Override
-    public boolean removeById(Long id) {
-        return database.getHospitals().removeIf(hospital -> hospital.getId().equals(id));
+    public boolean remove(Hospital hospital) {
+        return database.getHospitals().remove(hospital);
     }
 
     @Override
-    public List<Hospital> getAll() {
+    public List<Hospital> getAllHospital() {
         return database.getHospitals();
     }
 
-    @Override
-    public Hospital getHospitalById(Long id) {
-        for (Hospital hospital : database.getHospitals()) {
-            if (hospital.getId().equals(id)) ;
-            return hospital;
-        }
-        throw new NotFoundException("Not found hospital id");
-    }
+
 
 
 }

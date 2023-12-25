@@ -77,10 +77,10 @@ public class Database {
     hospital.setId(IDGenerator.idHospital());
     Hospital hospital1 = new Hospital("Мамакеев","Cухомлинов 28",
             new ArrayList<>(Arrays.asList(department2,department3,department4)),
-            new ArrayList<>(Arrays.asList(doctor3,doctor4,doctor5)),
+            new ArrayList<>(Arrays.asList(doctor3,doctor4,doctor5,doctor6)),
             new ArrayList<>(Arrays.asList(patient3,patient4,patient6,patient5)));
     hospital1.setId(IDGenerator.idHospital());
-    Hospital hospital2= new Hospital();
+    Hospital hospital2= new Hospital("НЦКТ","Бишкек",new ArrayList<>(),new ArrayList<>(),new ArrayList<>());
     hospital2.setId(IDGenerator.idHospital());
    return new LinkedList<>(List.of(hospital,hospital1,hospital2));
     }

@@ -9,7 +9,7 @@ import service.GenericService;
 
 import java.util.List;
 
-public class DepartmentServiceImpl implements GenericService<Department>, DepartmentService {
+public class DepartmentServiceImpl implements DepartmentService {
     private final DepartmentDaoImpl departmentDao;
 
     public DepartmentServiceImpl(DepartmentDaoImpl departmentDao) {
@@ -19,7 +19,10 @@ public class DepartmentServiceImpl implements GenericService<Department>, Depart
     @Override
     public List<Department> getAllDepartmentByHospitalId(Long id) {
         try {
-            return departmentDao.getallByHospitalId(id);
+            for (Hospital hospital : departmentDao.getAllHospital()) {
+                if (hospital.getId().equals(id)) return hospital.getDepartments();
+            }
+            throw new NotFoundException("Not found id!!!");
         } catch (NotFoundException e) {
             System.out.println(e.getMessage());
         }
@@ -30,11 +33,14 @@ public class DepartmentServiceImpl implements GenericService<Department>, Depart
     @Override
     public Department findDepartmentByName(String name) {
         try {
-            for (Department department : departmentDao.getAll()) {
-                if (department.getDepartmentName().equalsIgnoreCase(name)) {
-                    return department;
+            for (Hospital hospital : departmentDao.getAllHospital()) {
+                for (Department department : hospital.getDepartments()) {
+                    if (department.getDepartmentName().equalsIgnoreCase(name)) {
+                        return department;
+                    }
                 }
-            } throw new NotFoundException("Department name not found");
+                throw new NotFoundException("Department name not found");
+            }
         } catch (NotFoundException e) {
             System.out.println(e.getMessage());
         }
@@ -44,7 +50,12 @@ public class DepartmentServiceImpl implements GenericService<Department>, Depart
     @Override
     public String add(Long hospitalId, Department department) {
         try {
-            return departmentDao.add(hospitalId, department);
+            for (Hospital hospital : departmentDao.getAllHospital()) {
+                if (hospital.getId().equals(hospitalId)) {
+                    return departmentDao.add(hospital, department);
+                }
+            }
+            throw new NotFoundException("Not found id!!!");
         } catch (NotFoundException e) {
             return e.getMessage();
         }
@@ -52,20 +63,24 @@ public class DepartmentServiceImpl implements GenericService<Department>, Depart
 
     @Override
     public void removeById(Long id) {
-        try {
-            departmentDao.removeById(id);
-            System.out.println("deleted");
-        } catch (NotFoundException e) {
-            System.out.println(e.getMessage());
-        }
+        int count = 0;
+            for (Hospital hospital : departmentDao.getAllHospital()) {
+                if (hospital.getDepartments().removeIf(x -> x.getId().equals(id))) {
+                    System.out.println("Successfully deleted✅");
+                    count++;
+                }
+            }
+            if (count == 0) System.out.println("Not found id❗️");
     }
 
     @Override
     public String updateById(Long id, Department department) {
-        for (Department department1 : departmentDao.getAll()) {
-            if (department1.getId().equals(id)) {
-                department1.setDepartmentName(department.getDepartmentName());
-                return "Successfully updated";
+        for (Hospital hospital : departmentDao.getAllHospital()) {
+            for (Department department1 : hospital.getDepartments()) {
+                if (department1.getId().equals(id)) {
+                    department1.setDepartmentName(department.getDepartmentName());
+                    return "Successfully updated";
+                }
             }
         }
         return "Not found id";
